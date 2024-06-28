@@ -81,6 +81,15 @@ class Order(
         print(this.toString());
     }
 
+    fun logAsTable() {
+        print(StringBuilder()
+            .append(this.id)
+            .append(getSpaces(this.dishes.size.toString().length)).append(this.dishes.size)
+            .append(getSpaces(this.cost.toString().length)).append(this.cost)
+            .append(getSpaces(this.status.toString().length)).append(this.status)
+            .appendLine());
+    }
+
     override fun toString(): String {
         return StringBuilder()
             .append("Заказ № ").append(this.id).appendLine()

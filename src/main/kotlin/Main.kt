@@ -38,6 +38,10 @@ fun main() {
                 filterOrders();
             }
 
+            "s" -> {
+                sortOrders();
+            }
+
             "r" -> {
                 removeOrder()
             }
@@ -97,16 +101,17 @@ fun filterOrders() {
                 }
                 while (highNum < 0) {
                     try {
-                        println("Введите минимальную сумму:")
+                        println("Введите максимальную сумму:")
                         highNum = readln().toInt()
                     } catch (e : Exception) {
                         println("Некорректное число!")
                     }
                 }
+                printTableHeader()
                 orders.filter { order ->
                     var sum = order.getCost();
-                    sum in (lowNum + 1)..<highNum;
-                } . forEach{ it.log(); println("-------------") }
+                    sum in (lowNum).. highNum;
+                } . forEach{ it.logAsTable(); }
             }
             "d" -> {
                 lateinit var destination : Destination;
@@ -124,19 +129,21 @@ fun filterOrders() {
                         destination = Destination.DeliveryByExternalService;
                     }
                 }
+                printTableHeader()
                 orders.filter { it.getDestination() == destination }
-                    .forEach { it.log() ; println("-------------")}
+                    .forEach { it.logAsTable() }
 
             }
-            "c" -> {
+            "с" -> {
                 var num: Int;
                 while (true) {
                     try {
                         println("Введите количество блюд:")
                         num = readln().toInt()
                         if (num < 0) continue;
+                        printTableHeader()
                         orders.filter { order -> order.getDishes().size == num }
-                            .forEach { it.log() ; println("-------------")}
+                            .forEach { it.logAsTable() }
                     } catch (e : Exception) {
                         println("Некорректное число!")
                     }
@@ -144,6 +151,46 @@ fun filterOrders() {
             }
         }
     }
+}
+
+
+private fun sortOrders(){
+    var sortAction = "";
+    while (getAction({ value: String -> sortAction = value }, sortActions, "Введите корректный пункт!" ,::sortMenu) != "q"){
+        when (sortAction) {
+            "p" -> {
+                val asc = getAsc();
+                printTableHeader()
+                orders.sortedBy { order ->
+                    order.getCost() * asc;
+                } . forEach{ it.logAsTable(); }
+            }
+            "s" -> {
+                val asc = getAsc();
+                printTableHeader()
+                orders.sortedBy { it.getStatus().getNum() * asc }.forEach{ it.logAsTable(); }
+            }
+            "с" -> {
+                val asc = getAsc();
+                printTableHeader()
+                orders.sortedBy { order ->
+                    order.getDishes().size * asc;
+                } . forEach{ it.logAsTable(); }
+            }
+        }
+    }
+}
+
+private fun getAsc() : Int {
+    var asc = 0;
+    while (asc != -1 && asc != 1){
+        try {
+            println("По возрастанию(1) или по убыванию(-1)?")
+            asc = readln().toInt();
+            if (asc == -1 || asc == 1) break;
+        } catch (_: Exception){ }
+    }
+    return asc;
 }
 
 fun addOrder() {
@@ -202,7 +249,15 @@ fun addDishToOrder(order: Order) {
     order.addDish(getDish())
 }
 
-
+private fun printTableHeader(){
+    print(StringBuilder()
+        .append(getSpaces(2)).append("Id")
+        .append(getSpaces(11)).append("Кол-во блюд")
+        .append(getSpaces(12)).append("Сумма заказа")
+        .append(getSpaces(6)).append("Статус")
+        .append(getSymbols("-",52)).appendLine()
+    )
+}
 
 
 private fun getDish(): Dish {
@@ -282,11 +337,20 @@ val globalActions = listOf(
     "a", "add",
     "f", "filter",
     "r", "remove",
+    "s", "sort",
 )
 
 val filterActions = listOf(
     "p", "price",
     "d", "dishes",
+    "c", "count dishes",
+    "q", "quit",
+)
+
+val sortActions = listOf(
+    "p", "price",
+    "s", "status",
+    "c", "count dishes",
     "q", "quit",
 )
 
@@ -309,6 +373,7 @@ private fun globalMenu() {
     println("Добавить заказ/блюдо к заказу - add(a)")
     println("Удалить заказ - remove(r)")
     println("Фильтр заказов - filter(f)")
+    println("Сортировка заказов - sort(s)")
     println("Выйти - quit(q)")
 }
 
@@ -331,6 +396,14 @@ private fun filterMenu() {
     println("Введите фильтр:")
     println("По сумме заказа - price(p)")
     println("По назначению - destination(d)")
+    println("Количеству блюд - count dishes(c)")
+    println("Выйти - quit(q)")
+}
+
+private fun sortMenu() {
+    println("Введите пункт сортировки:")
+    println("По сумме заказа - price(p)")
+    println("По статусу - status(s)")
     println("Количеству блюд - count dishes(c)")
     println("Выйти - quit(q)")
 }
