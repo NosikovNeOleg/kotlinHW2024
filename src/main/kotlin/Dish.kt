@@ -15,15 +15,6 @@ class Dish(
 ) {
     private var status : DishStatus = DishStatus.Open;
 
-    init {
-        if (cookingTime < 1) {
-            // LOG
-        }
-        if (name.isEmpty() || name.isBlank()) {
-            // LOG
-        }
-    }
-
     fun getName(): String {
         return this.name;
     }
